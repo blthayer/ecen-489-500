@@ -151,8 +151,11 @@ def a_star(world, expansion, path):
             heappush(hq, (total_cost, q_count, linked_list))
             q_count += 1
 
+    # Update the expansion array - we're expanding our starting point.
+    expansion[START[0]][START[1]] = 0
+
     # t for time (also our iteration counter)
-    t = 0
+    t = 1
 
     # Loop.
     while (not np.array_equal(hq[0][2].position, GOAL)) and (t < 1000):
