@@ -130,6 +130,9 @@ def heuristic(position, goal):
 
 def a_star(world, expansion, path):
     """Run the A* algorithm."""
+    # Track nodes that have been evaluated.
+    visited_nodes = {tuple(START), }
+
     # Initialize loop:
     # We'll be using a Python's heapq as a priority queue, hence hq.
     hq = []
@@ -166,14 +169,24 @@ def a_star(world, expansion, path):
         queue_entry = heappop(hq)
         node = queue_entry[2]
 
+        # If we've already visited this node, move along.
+        # NOTE: It would probably be more efficient to use some sort of
+        # unique identifier for each node, rather than a tuple of
+        # position, but oh well.
+        position_tuple = tuple(node.position)
+        if position_tuple in visited_nodes:
+            # Move to the next iteration of the loop.
+            continue
+        else:
+            # Update our set.
+            visited_nodes.add(position_tuple)
+
         # Update our expansion array.
         expansion[node.position[0]][node.position[1]] = t
 
         # Get possible moves from here.
         moves = get_available_moves(world=world, position=node.position,
                                     previous_position=node.back.position)
-
-        # TODO: If the
 
         # Loop over the moves and evaluate them.
         for idx, m in enumerate(moves):
