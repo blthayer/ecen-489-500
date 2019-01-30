@@ -161,7 +161,8 @@ def a_star(world, expansion, path):
     t = 1
 
     # Loop.
-    while (not np.array_equal(hq[0][2].position, GOAL)) and (t < 1000):
+    max_iter = 10000
+    while (not np.array_equal(hq[0][2].position, GOAL)) and (t <= max_iter):
         # Pop the lowest cost list from the queue.
         # TODO: if hq is empty, we failed to find a path. In other
         #   words, a valid path doesn't exist. We likely don't need to
@@ -201,6 +202,10 @@ def a_star(world, expansion, path):
                 q_count += 1
 
         t += 1
+
+    if t >= max_iter:
+        raise UserWarning('Algorithm terminated after {} '
+                          'iterations.'.format(max_iter))
 
     # Map out the best path.
     best_entry = heappop(hq)
