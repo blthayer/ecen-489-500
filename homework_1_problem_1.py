@@ -8,10 +8,6 @@ import json
 # FUNCTIONS
 ########################################################################
 
-########################################################################
-# PROBLEM 1
-########################################################################
-
 
 def check_constraint_problem_1(a, b):
     """Ensure that transitioning from state a to b is valid.
@@ -46,6 +42,8 @@ def test_check_constraint_problem_1():
     assert not check_constraint_problem_1(0, 7)
     assert check_constraint_problem_1(0, 2)
     assert check_constraint_problem_1(7, 6)
+    assert not check_constraint_problem_1(1, 6)
+    assert not check_constraint_problem_1(3, 4)
 
 
 def problem_1():
@@ -88,7 +86,9 @@ if __name__ == '__main__':
     # Problem 1
     print('Problem 1:')
     print('See {} for part (a).'.format(pdf))
+    # Run "tests"
     test_check_constraint_problem_1()
+    # Generate the problem.
     p1 = problem_1()
     # b)
     sol1 = p1.getSolution()

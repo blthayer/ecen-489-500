@@ -10,7 +10,7 @@ from constraint import Problem
 
 class Case:
     """Computer case class."""
-    def __init__(self, case_id, motherboard_factors, pci_max_length):
+    def __init__(self, *, case_id, motherboard_factors, pci_max_length):
         self.id = case_id
         self.motherboard_factors = motherboard_factors
         self.pci_max_length = pci_max_length
@@ -18,7 +18,7 @@ class Case:
 
 class Motherboard:
     """Motherboard class."""
-    def __init__(self, motherboad_id, factor, chipset, dimm_sockets,
+    def __init__(self, *, motherboad_id, factor, chipset, dimm_sockets,
                  nvme_slots):
         self.id = motherboad_id
         self.factor = factor
@@ -34,21 +34,21 @@ class Motherboard:
 
 class Memory:
     """Memory class."""
-    def __init__(self, memory_id, num):
+    def __init__(self, *, memory_id, num):
         self.id = memory_id
         self.num = num
 
 
 class GPU:
     """GPU class."""
-    def __init__(self, gpu_id, pci_length):
+    def __init__(self, *, gpu_id, pci_length):
         self.id = gpu_id
         self.pci_length = pci_length
 
 
 class SSD:
     """Storage (SSD) class."""
-    def __init__(self, ssd_id, nvme):
+    def __init__(self, *, ssd_id, nvme):
         """
         :param ssd_id: ID of the SSD.
         :param nvme: 1/0 --> 1 if the SSD is nVME, 0 if the SSD is SATA
@@ -59,7 +59,7 @@ class SSD:
 
 class CPU:
     """Processor (CPU) class."""
-    def __init__(self, cpu_id, overclock):
+    def __init__(self, *, cpu_id, overclock):
         self.id = cpu_id
         self.overclock = overclock
 
@@ -125,20 +125,20 @@ def motherboard_memory(motherboard, memory):
     """Determine if a Motherboard and Memory are compatible (True) or
     not (False).
     """
-    if motherboard.dimm_sockets < memory.num:
-        return False
-    else:
+    if motherboard.dimm_sockets >= memory.num:
         return True
+    else:
+        return False
 
 
 def motherboard_ssd(motherboard, ssd):
     """Determine if a Motherboard and SSD are compatible (True) or not
     (False).
     """
-    if ssd.nvme > motherboard.nvme_slots:
-        return False
-    else:
+    if motherboard.nvme_slots >= ssd.nvme:
         return True
+    else:
+        return False
 
 
 def motherboard_cpu(motherboard, cpu):
@@ -146,21 +146,26 @@ def motherboard_cpu(motherboard, cpu):
     (False).
     """
     if cpu.overclock:
+        # CPU must be overclocked.
+
         if motherboard.cpu_overclock:
+            # Motherboard supports overclocking.
             return True
         else:
+            # Motherboard does not support overclocking.
             return False
     else:
+        # CPU does not need to be overclocked.
         return True
 
 
 def case_gpu(case, gpu):
     """Determine if a Case and GPU are compatible (True) or not (False).
     """
-    if gpu.pci_length > case.pci_max_length:
-        return False
-    else:
+    if case.pci_max_length >= gpu.pci_length:
         return True
+    else:
+        return False
 
 
 def problem_2():
@@ -187,12 +192,33 @@ def problem_2():
 
 
 def generate_pc_id(solution):
+    """Concatenate the ID's of the components to create a PC ID."""
+
     variables = ['case', 'motherboard', 'CPU', 'memory', 'SSD', 'GPU']
     out = ''
     for v in variables:
         out += solution[v].id
 
     return out
+
+
+def check_solution(solution):
+    """Ensure a solution is valid. Hard-coded test."""
+    # Initialize array to hold results of each function call.
+    result_array = list()
+
+    result_array.append(motherboard_case(solution['motherboard'],
+                                         solution['case']))
+    result_array.append(motherboard_memory(solution['motherboard'],
+                                           solution['memory']))
+    result_array.append(motherboard_ssd(solution['motherboard'],
+                                        solution['SSD']))
+    result_array.append(motherboard_cpu(solution['motherboard'],
+                                        solution['CPU']))
+    result_array.append(case_gpu(solution['case'], solution['GPU']))
+
+    return all(result_array)
+
 
 ########################################################################
 # MAIN
@@ -203,7 +229,6 @@ if __name__ == '__main__':
     pdf = 'homework_1.pdf'
     # Problem 2
     print('Problem 2:')
-    problem_2()
     print('See {} for part (a)'.format(pdf))
     p2 = problem_2()
     sol2 = p2.getSolution()
@@ -212,3 +237,9 @@ if __name__ == '__main__':
     print(generate_pc_id(sol2))
     all_sol2 = p2.getSolutions()
     print('There are {} valid solutions.'.format(len(all_sol2)))
+
+    # Check all solutions.
+    for sol in all_sol2:
+        valid = check_solution(sol)
+        if not valid:
+            print('invalid solution')
