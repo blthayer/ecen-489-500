@@ -1,5 +1,7 @@
+gym
 jupyter
 matplotlib
 numpy
 pandas
 python-constraint
+seaborn
