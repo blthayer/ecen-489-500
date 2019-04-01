@@ -77,7 +77,9 @@ def main():
             df[col_name] = df[col_name].astype('category')
             df[col_name] = df[col_name].cat.codes
 
+    ####################################################################
     # Step 3): Fix bad observations.
+    ####################################################################
     # Find and drop bad data value.
     bad_idx = df["Feature07"].idxmax()
     df.drop(bad_idx, inplace=True)
@@ -228,6 +230,7 @@ def main():
     c_str.append('Stochastic Gradient Descent, SH')
 
     ####################################################################
+    # Step 8 (labeled 5 in prompt) - Test time.
     # Determine best model. Hard-code retrain and test on testing data.
     ####################################################################
     print('Best F1 score: {:.4f}'.format(max(f1)))
