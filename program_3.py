@@ -7,7 +7,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import confusion_matrix, f1_score
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.datasets import make_classification
 
 # Avoid truncation when using 'describe'
 pd.set_option('display.max_columns', None)
@@ -91,7 +90,8 @@ def main():
     df.dropna(subset=['Feature01'], inplace=True)
 
     # Features 0, 2, and 3 should have NaN's zeroed out. I think this
-    # step is unnecessary.
+    # step is unnecessary since we fill the remaining columns with 0
+    # afterwards.
     zero_cols = {'Feature00': 0, 'Feature02': 0, 'Feature03': 0}
     df.fillna(zero_cols, inplace=True)
 
@@ -122,119 +122,117 @@ def main():
     # Step 6 (labeled 4 in the prompt) - Normalize.
     ####################################################################
     # Initialize scaler object.
-    scaler = StandardScaler()
+    scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
     # Fit to the training data, then transform it.
     x_train = scaler.fit_transform(x_train)
     # Transform testing and validation data.
-    # TODO: Prompt mentions there's some work to do before final test
-    #   evaluation.
     x_test = scaler.transform(x_test)
     x_val = scaler.transform(x_val)
 
     ####################################################################
     # Step 7 (labeled 5 in prompt) - Classify.
     ####################################################################
-    # # Initialize lists for storing results.
-    # f1 = []
-    # c_str = []
-    #
-    # # **NAIVE BAYES**
-    # # Initialize and train.
-    # nb_classifier = GaussianNB()
-    # # Train, predict, score.
-    # # noinspection PyTypeChecker
-    # cm_nb, f1_nb = train_predict(model=nb_classifier, x_train=x_train,
-    #                              y_train=y_train, x_test=x_val, y_test=y_val,
-    #                              c_str='Naive Bayes')
-    # f1.append(f1_nb)
-    # c_str.append('Naive Bayes')
-    #
-    # # **LOGISTIC REGRESSION**
-    # # L2 regularization:
-    # for c in [0.01, 0.1, 1, 10]:
-    #     s = 'Logistic Regression, L2, C={}'.format(c)
-    #     lr2_classifier = LogisticRegression(random_state=0, solver='lbfgs',
-    #                                         penalty='l2', max_iter=1000,
-    #                                         C=c)
-    #     cm_lr2, f1_lr2 = train_predict(model=lr2_classifier, x_train=x_train,
-    #                                    y_train=y_train, x_test=x_val,
-    #                                    y_test=y_val,
-    #                                    c_str=s)
-    #     f1.append(f1_lr2)
-    #     c_str.append(s)
-    #
-    # # L1 regularization:
-    # for c in [0.01, 0.1, 1, 10]:
-    #     s = 'Logistic Regression, L1, C={}'.format(c)
-    #     lr1_classifier = LogisticRegression(random_state=0, solver='saga',
-    #                                         penalty='l1', max_iter=1000,
-    #                                         C=c)
-    #     cm_lr1, f1_lr1 = train_predict(model=lr1_classifier,
-    #                                    x_train=x_train,
-    #                                    y_train=y_train, x_test=x_val,
-    #                                    y_test=y_val,
-    #                                    c_str=s)
-    #     f1.append(f1_lr1)
-    #     c_str.append(s)
-    #
-    # # ** Stochastic Gradient Descent **
-    # # L2 regularization:
-    # sgd_classifier2 = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l2')
-    # # noinspection PyTypeChecker
-    # cm_sgd2, f1_sgd2 = train_predict(model=sgd_classifier2, x_train=x_train,
-    #                                  y_train=y_train, x_test=x_val,
-    #                                  y_test=y_val,
-    #                                  c_str='Stochastic Gradient Descent, L2')
-    # f1.append(f1_sgd2)
-    # c_str.append('Stochastic Gradient Descent, L2')
-    #
-    # # L1 regularization:
-    # for a in [0.0001, 0.001, 0.01, 0.1]:
-    #     s = 'Stochastic Gradient Descent, L1, alpha={}'.format(a)
-    #     sgd_classifier1 = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l1',
-    #                                     alpha=a)
-    #     # noinspection PyTypeChecker
-    #     cm_sgd1, f1_sgd1 = \
-    #         train_predict(model=sgd_classifier1,
-    #                       x_train=x_train,
-    #                       y_train=y_train, x_test=x_val,
-    #                       y_test=y_val,
-    #                       c_str=s)
-    #     f1.append(f1_sgd1)
-    #     c_str.append(s)
-    #
-    # # L2, modified_huber loss
-    # sgd_classifier_mh = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l2',
-    #                                   loss='modified_huber')
-    # # noinspection PyTypeChecker
-    # cm_sgd_mh, f1_sgd_mh = \
-    #     train_predict(model=sgd_classifier_mh,
-    #                   x_train=x_train,
-    #                   y_train=y_train, x_test=x_val,
-    #                   y_test=y_val,
-    #                   c_str='Stochastic Gradient Descent, MH')
-    # f1.append(f1_sgd_mh)
-    # c_str.append('Stochastic Gradient Descent, MH')
-    #
-    # # L2, squared_hinge loss
-    # sgd_classifier_sh = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l2',
-    #                                   loss='squared_hinge')
-    # # noinspection PyTypeChecker
-    # cm_sgd_sh, f1_sgd_sh = \
-    #     train_predict(model=sgd_classifier_sh,
-    #                   x_train=x_train,
-    #                   y_train=y_train, x_test=x_val,
-    #                   y_test=y_val,
-    #                   c_str='Stochastic Gradient Descent, SH')
-    # f1.append(f1_sgd_sh)
-    # c_str.append('Stochastic Gradient Descent, SH')
-    #
-    # ####################################################################
-    # # Determine best model. Hard-code retrain and test on testing data.
-    # ####################################################################
-    # print('Best F1 score: {:.4f}'.format(max(f1)))
-    # # noinspection PyTypeChecker
-    # print('Corresponding model: {}'.format(c_str[np.argmax(np.array(f1))]))
+    # Initialize lists for storing results.
+    f1 = []
+    c_str = []
+
+    # **NAIVE BAYES**
+    # Initialize and train.
+    nb_classifier = GaussianNB()
+    # Train, predict, score.
+    # noinspection PyTypeChecker
+    cm_nb, f1_nb = train_predict(model=nb_classifier, x_train=x_train,
+                                 y_train=y_train, x_test=x_val, y_test=y_val,
+                                 c_str='Naive Bayes')
+    f1.append(f1_nb)
+    c_str.append('Naive Bayes')
+
+    # **LOGISTIC REGRESSION**
+    # L2 regularization:
+    for c in [0.01, 0.1, 1, 10]:
+        s = 'Logistic Regression, L2, C={}'.format(c)
+        lr2_classifier = LogisticRegression(random_state=0, solver='lbfgs',
+                                            penalty='l2', max_iter=1000,
+                                            C=c)
+        cm_lr2, f1_lr2 = train_predict(model=lr2_classifier, x_train=x_train,
+                                       y_train=y_train, x_test=x_val,
+                                       y_test=y_val,
+                                       c_str=s)
+        f1.append(f1_lr2)
+        c_str.append(s)
+
+    # L1 regularization:
+    for c in [0.01, 0.1, 1, 10]:
+        s = 'Logistic Regression, L1, C={}'.format(c)
+        lr1_classifier = LogisticRegression(random_state=0, solver='saga',
+                                            penalty='l1', max_iter=1000,
+                                            C=c)
+        cm_lr1, f1_lr1 = train_predict(model=lr1_classifier,
+                                       x_train=x_train,
+                                       y_train=y_train, x_test=x_val,
+                                       y_test=y_val,
+                                       c_str=s)
+        f1.append(f1_lr1)
+        c_str.append(s)
+
+    # ** Stochastic Gradient Descent **
+    # L2 regularization:
+    sgd_classifier2 = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l2')
+    # noinspection PyTypeChecker
+    cm_sgd2, f1_sgd2 = train_predict(model=sgd_classifier2, x_train=x_train,
+                                     y_train=y_train, x_test=x_val,
+                                     y_test=y_val,
+                                     c_str='Stochastic Gradient Descent, L2')
+    f1.append(f1_sgd2)
+    c_str.append('Stochastic Gradient Descent, L2')
+
+    # L1 regularization:
+    for a in [0.0001, 0.001, 0.01, 0.1]:
+        s = 'Stochastic Gradient Descent, L1, alpha={}'.format(a)
+        sgd_classifier1 = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l1',
+                                        alpha=a)
+        # noinspection PyTypeChecker
+        cm_sgd1, f1_sgd1 = \
+            train_predict(model=sgd_classifier1,
+                          x_train=x_train,
+                          y_train=y_train, x_test=x_val,
+                          y_test=y_val,
+                          c_str=s)
+        f1.append(f1_sgd1)
+        c_str.append(s)
+
+    # L2, modified_huber loss
+    sgd_classifier_mh = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l2',
+                                      loss='modified_huber')
+    # noinspection PyTypeChecker
+    cm_sgd_mh, f1_sgd_mh = \
+        train_predict(model=sgd_classifier_mh,
+                      x_train=x_train,
+                      y_train=y_train, x_test=x_val,
+                      y_test=y_val,
+                      c_str='Stochastic Gradient Descent, MH')
+    f1.append(f1_sgd_mh)
+    c_str.append('Stochastic Gradient Descent, MH')
+
+    # L2, squared_hinge loss
+    sgd_classifier_sh = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l2',
+                                      loss='squared_hinge')
+    # noinspection PyTypeChecker
+    cm_sgd_sh, f1_sgd_sh = \
+        train_predict(model=sgd_classifier_sh,
+                      x_train=x_train,
+                      y_train=y_train, x_test=x_val,
+                      y_test=y_val,
+                      c_str='Stochastic Gradient Descent, SH')
+    f1.append(f1_sgd_sh)
+    c_str.append('Stochastic Gradient Descent, SH')
+
+    ####################################################################
+    # Determine best model. Hard-code retrain and test on testing data.
+    ####################################################################
+    print('Best F1 score: {:.4f}'.format(max(f1)))
+    # noinspection PyTypeChecker
+    print('Corresponding model: {}'.format(c_str[np.argmax(np.array(f1))]))
 
     sgd_classifier1 = SGDClassifier(max_iter=1000, tol=1e-4, penalty='l1',
                                     alpha=0.001)
@@ -244,7 +242,7 @@ def main():
                       x_train=np.vstack((x_train, x_val)),
                       y_train=np.hstack((y_train, y_val)),
                       x_test=x_test, y_test=y_test,
-                      c_str='Stochastic Gradient Descent, L1, C=0.1')
+                      c_str='Stochastic Gradient Descent, L1, alpha=0.001')
 
     ####################################################################
     # Step 8 (labeled step 6 in the prompt)
@@ -259,20 +257,22 @@ def main():
         print("%d. feature %d (%f)" % (f + 1, indices[f],
                                        importances[indices[f]]))
 
-    # Extract top two features from our already conveniently scaled
-    # data.
+    # Extract top two features from our already scaled data.
     x_train_2 = x_train[:, indices[0:2]]
     x_val_2 = x_val[:, indices[0:2]]
     x_test_2 = x_test[:, indices[0:2]]
 
     # Perform Naive Bayes again.
-    # # Initialize and train.
+    # Initialize and train.
     nb2 = GaussianNB()
-    # Train, predict, score.
+    # Train, predict, and score. Use the full training + validation set
+    # for training, and the testing dataset for testing.
     # noinspection PyTypeChecker
-    cm_nb2, f1_nb2 = train_predict(model=nb2, x_train=x_train_2,
-                                   y_train=y_train, x_test=x_val_2,
-                                   y_test=y_val,
+    cm_nb2, f1_nb2 = train_predict(model=nb2,
+                                   x_train=np.vstack((x_train_2, x_val_2)),
+                                   y_train=np.hstack((y_train, y_val)),
+                                   x_test=x_test_2,
+                                   y_test=y_test,
                                    c_str='Naive Bayes, 2 Features')
 
     # Plot the two most important features on a scatter.
@@ -285,7 +285,8 @@ def main():
                    alpha=0.2, label=key,
                    color=colors[key])
 
-    # TODO: Something's not quite right here...
+    plt.show()
+
     # Set min and max values and give it some padding
     x_min, x_max = x_val_2[:, 0].min() - .5, x_val_2[:, 0].max() + .5
     y_min, y_max = x_val_2[:, 1].min() - .5, x_val_2[:, 1].max() + .5
@@ -298,13 +299,13 @@ def main():
     z = z.reshape(xx.shape)
     # Plot the contour and test examples
     # noinspection PyUnresolvedReferences
-    # TODO: why are we needing to flip?
-    # plt.contourf(xx, yy, np.flip(z), cmap=plt.cm.Spectral)
     plt.contourf(xx, yy, z, cmap=plt.cm.Spectral)
     # noinspection PyUnresolvedReferences
     plt.scatter(x_val_2[:, 0], x_val_2[:, 1], c=y_val, cmap=plt.cm.Spectral)
 
     plt.show()
+
+    pass
 
 
 if __name__ == '__main__':
