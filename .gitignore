@@ -1,3 +1,6 @@
+# Ignore downloaded lecture ipynb files.
+lecture_ipynb/*
+
 # Ignore PyCharm's .idea stuff.
 .idea
 

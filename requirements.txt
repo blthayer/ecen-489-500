@@ -1,5 +1,6 @@
 gym
 jupyter
+keras
 matplotlib
 numpy
 pandas
@@ -7,3 +8,4 @@ python-constraint
 scipy
 scikit-learn
 seaborn
+tensorflow
