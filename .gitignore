@@ -1,5 +1,6 @@
-# Ignore .png files.
+# Ignore .png and .dot files.
 *.png
+*.dot
 
 # Ignore downloaded lecture ipynb files.
 lecture_ipynb/*
