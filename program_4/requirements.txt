@@ -1,0 +1,7 @@
+keras
+numpy
+pandas
+pillow
+jupyter
+scipy
+scikit-learn

@@ -1,0 +1,8 @@
+# No notebook junk.
+.ipynb_checkpoints
+# Don't track the decompressed data
+ECEN489Py4Data
+# Don't track results file.
+results.csv
+# Don't track prompt
+*.doc
