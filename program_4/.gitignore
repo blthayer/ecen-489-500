@@ -6,3 +6,5 @@ ECEN489Py4Data
 results.csv
 # Don't track prompt
 *.doc
+# Don't track Keras models.
+*.h5
